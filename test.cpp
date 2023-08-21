@@ -20,31 +20,35 @@ void displayLevel(int level, sf::RenderWindow &window, sf::Text &levelText) {
 
 std::pair<int, int> getNextLevelParameters(int level) {
     // Constants for maximum rows and columns
-    const int maxRows = 9;
+    const int maxRows = 8;
     const int maxColumns = 17;
     int rows = 1;
-    int columns = 1;
+    int columns = maxColumns;
 
     std::cout << "loading level " << level << std::endl;
     // Base case
     if (level <= 1){
         rows = 2;
-        columns = 3;
+        // columns = 3;
     }
 
     if (2 <= level && level < maxColumns){
         // Calculate the number of rows and columns based on the level
         rows = (level % maxRows) + 1;
-        columns = (2 * level % maxColumns) + 1;
+        // columns = (2 * level % maxColumns) + 1;
         }
     // The max difficulty before things render off screen
     if (maxRows <= level){
         rows = maxRows;
-        columns = maxColumns;
+        // columns = maxColumns;
     }
     return {rows, columns};
 }
 
+enum GameState {
+    Playing,
+    GameOver
+};
 
 
 int main()
@@ -57,7 +61,7 @@ int main()
     int score = 0;
     
     // Set level
-    int level = 8;
+    int level = 6;
 
     //Load Font
     sf::Font font;
@@ -96,6 +100,17 @@ int main()
 
     // Set up window
     sf::RenderWindow window(sf::VideoMode(width, height), "SFML works!");
+
+    // Set game state
+    GameState gameState = Playing;
+
+    // Set up game over text
+    sf::Text gameOverText;
+    gameOverText.setFont(font);
+    gameOverText.setString("Game Over");
+    gameOverText.setCharacterSize(40); // Set the size as needed
+    gameOverText.setFillColor(sf::Color::Red);
+    gameOverText.setPosition(window.getSize().x / 2 - gameOverText.getGlobalBounds().width / 2, window.getSize().y / 2 - gameOverText.getGlobalBounds().height / 2);
 
     window.setFramerateLimit(60);
     
@@ -148,6 +163,37 @@ int main()
             levelText.setString("Level: " + std::to_string(level));
             auto [rows, columns] = getNextLevelParameters(level);
             alienManager.loadAliens(rows, columns, AlienTextures::Octopus1, AlienTextures::Octopus2);
+        }
+
+        // Check for game over condition
+        sf::FloatRect alienBounds = alienManager.getBounds();
+        if (alienBounds.top + alienBounds.height >= height / 8.0f * 7) {
+            gameState = GameOver;
+        }
+
+        while (gameState == GameOver) {
+            sf::Event event;
+            while (window.pollEvent(event)) {
+                if (event.type == sf::Event::Closed) {
+                    window.close();
+                }
+            }
+
+            // Draw the game over text
+            window.clear();
+            window.draw(gameOverText);
+            window.display();
+
+            // Listen for Enter key
+            if (sf::Keyboard::isKeyPressed(sf::Keyboard::Enter)) {
+                // Restart the game
+                level = 1;
+                score = 0;
+                auto [rows, columns] = getNextLevelParameters(level);
+                levelText.setString("Level: " + std::to_string(level));
+                alienManager.loadAliens(rows, columns, AlienTextures::Octopus1, AlienTextures::Octopus2);
+                gameState = Playing;
+            }
         }
 
 
