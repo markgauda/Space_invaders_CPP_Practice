@@ -148,7 +148,7 @@ void AlienManager::loadAliens(int numRows, int numColumns, const sf::IntRect &te
 
     for (int row = 0; row < numRows; row++) {
         for (int column = 0; column < numColumns; column++) {
-            sf::Vector2f position(column * distanceBetweenAliens, row * distanceBetweenAliens + 50);
+            sf::Vector2f position(column * distanceBetweenAliens, row * distanceBetweenAliens + 100);
             alienGroup.push_back(Alien(texture, textureRect1, textureRect2, position));
         }
     }
@@ -163,13 +163,14 @@ CollisionSide AlienManager::checkAliensAtBorder() const {
     return NONE;
 }
 
-void AlienManager::setDeathCallback(std::function<void()> callback) {
+void AlienManager::setDeathCallback(std::function<void(int)> callback) {
     deathCallback = callback;
 }
   
 void AlienManager::alienDied() {
     if(deathCallback) {
-        deathCallback();
+        // Replace this with the alien point value
+        deathCallback(25);
     }
 }
 

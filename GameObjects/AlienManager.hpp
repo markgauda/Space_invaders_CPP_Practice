@@ -18,7 +18,7 @@ public:
     void loadAliens(int numRows, int numColumns, const sf::IntRect &textureRect1, const sf::IntRect &textureRect2);
     CollisionSide checkAliensAtBorder() const;
     void sweepAndPrune(const std::vector<Bullet>& bullets); //Sweep and prune helper function
-    void setDeathCallback(std::function<void()> callback);
+    void setDeathCallback(std::function<void(int)> callback);
     void alienDied();
     bool isOutOfAliens();
     ~AlienManager();
@@ -28,7 +28,7 @@ private:
     bool alienHitsEdge(const Alien &alien);
     sf::Texture texture;
     void deleteAlien(Alien* alien);
-    std::function<void()> deathCallback;
+    std::function<void(int)> deathCallback;
     const float collisionThreshold = 50.0f; // Threshold for sweep and prune
 };
 
