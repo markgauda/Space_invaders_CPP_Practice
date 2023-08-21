@@ -52,7 +52,7 @@ void Alien::draw(sf::RenderWindow& window) {
     // window.draw(shape);
 }
 void Alien::moveDown() {
-    const float moveSpeed = 5.0f; // Adjust as needed
+    const float moveSpeed = 10.0f; // Adjust as needed
     alienSprite.move(0, moveSpeed); // Move down by moveSpeed
 }
 bool Alien::hitsEdge(const sf::RenderWindow &window) const {
