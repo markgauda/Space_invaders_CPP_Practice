@@ -61,7 +61,7 @@ int main()
     int score = 0;
     
     // Set level
-    int level = 6;
+    int level = 1;
 
     //Load Font
     sf::Font font;
