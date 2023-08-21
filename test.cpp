@@ -8,9 +8,44 @@
 #include "GameObjects/Alien.hpp"
 #include "GameObjects/AlienManager.hpp"
 
-void increaseScore(int& score) {
-  score += 10;
+void increaseScore(int& score, int increaseBy) {
+  score += increaseBy;
 }
+
+void displayLevel(int level, sf::RenderWindow &window, sf::Text &levelText) {
+   levelText.setString("Level: " + std::to_string(level));
+   window.draw(levelText);
+   std::cout << "Called level display " << std::endl;
+}
+
+std::pair<int, int> getNextLevelParameters(int level) {
+    // Constants for maximum rows and columns
+    const int maxRows = 9;
+    const int maxColumns = 17;
+    int rows = 1;
+    int columns = 1;
+
+    std::cout << "loading level " << level << std::endl;
+    // Base case
+    if (level <= 1){
+        rows = 2;
+        columns = 3;
+    }
+
+    if (2 <= level && level < maxColumns){
+        // Calculate the number of rows and columns based on the level
+        rows = (level % maxRows) + 1;
+        columns = (2 * level % maxColumns) + 1;
+        }
+    // The max difficulty before things render off screen
+    if (maxRows <= level){
+        rows = maxRows;
+        columns = maxColumns;
+    }
+    return {rows, columns};
+}
+
+
 
 int main()
 {
@@ -20,6 +55,9 @@ int main()
 
     // Set score
     int score = 0;
+    
+    // Set level
+    int level = 8;
 
     //Load Font
     sf::Font font;
@@ -33,6 +71,14 @@ int main()
     scoreText.setFillColor(sf::Color::White);
     scoreText.setPosition(10, 10);
     
+    // Load level text
+    sf::Text levelText;
+    levelText.setFont(font);
+    levelText.setCharacterSize(24);
+    levelText.setFillColor(sf::Color::White);
+    levelText.setPosition(10, 40); // Or any position you like
+    levelText.setString("Level: " + std::to_string(level));
+
 
     // Make battle ship
     sf::Texture playerTexture;
@@ -56,12 +102,15 @@ int main()
     // Set up managers
     CollisionManager::initialize(window);
     BulletManager& bulletManager = BulletManager::getInstance();
-    AlienManager alienManager(4, 5, AlienTextures::Octopus1, AlienTextures::Octopus2);
+    auto [rows, columns] = getNextLevelParameters(level);
+    AlienManager alienManager(rows, columns, AlienTextures::Octopus1, AlienTextures::Octopus2);
 
     // Set Score callback
-    alienManager.setDeathCallback(std::bind(increaseScore, std::ref(score)));
+    auto increaseScoreCallback = [&score](int increaseByValue){increaseScore(score, increaseByValue);};
+    alienManager.setDeathCallback(increaseScoreCallback);
 
     int speed = 5.0f;
+
     while (window.isOpen())
     {
         sf::Event event;
@@ -95,7 +144,10 @@ int main()
         alienManager.update(1);
         scoreText.setString("Score: " + std::to_string(score));
         if (alienManager.isOutOfAliens()){
-            alienManager.loadAliens(8, 15, AlienTextures::Octopus1, AlienTextures::Octopus2);
+            level++;
+            levelText.setString("Level: " + std::to_string(level));
+            auto [rows, columns] = getNextLevelParameters(level);
+            alienManager.loadAliens(rows, columns, AlienTextures::Octopus1, AlienTextures::Octopus2);
         }
 
 
@@ -104,6 +156,7 @@ int main()
         window.clear();
         window.draw(shape);
         window.draw(scoreText);
+        window.draw(levelText);
         bulletManager.drawBullets(window);
         alienManager.draw(window);
         window.display();
@@ -111,6 +164,3 @@ int main()
 
     return 0;
 }
-
-
-
